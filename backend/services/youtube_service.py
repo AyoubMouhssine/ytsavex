@@ -48,20 +48,13 @@ def get_base_ydl_opts() -> dict:
         'geo_bypass': True,
     }
 
+    # Si un proxy est défini dans les variables d'environnement de Render
+    proxy_url = os.getenv("YOUTUBE_PROXY")
+    if proxy_url:
+        opts['proxy'] = proxy_url
+
     if os.path.exists(COOKIES_FILE_PATH) and os.path.getsize(COOKIES_FILE_PATH) > 0:
         opts['cookiefile'] = COOKIES_FILE_PATH
-        opts['extractor_args'] = {
-            'youtube': {
-                # web_creator (YouTube Studio) + mweb contournent le blocage PO-Token avec cookies sur datacenter
-                'player_client': ['web_creator', 'mweb', 'web'],
-            }
-        }
-    else:
-        opts['extractor_args'] = {
-            'youtube': {
-                'player_client': ['android'],
-            }
-        }
 
     return opts
 
