@@ -44,25 +44,19 @@ def get_base_ydl_opts() -> dict:
         'quiet': True,
         'no_warnings': True,
         'socket_timeout': 30,
+        'geo_bypass': True,
+        'extractor_args': {
+            'youtube': {
+                # 'tv_embedded' en premier : fournit les flux directs sans blocage SABR sur datacenter
+                'player_client': ['tv_embedded', 'android', 'mweb', 'web'],
+            }
+        },
     }
 
-    # Si cookies.txt existe (et n'est pas vide), on injecte le fichier de cookies
     if os.path.exists(COOKIES_FILE_PATH) and os.path.getsize(COOKIES_FILE_PATH) > 0:
         opts['cookiefile'] = COOKIES_FILE_PATH
-        opts['extractor_args'] = {
-            'youtube': {
-                'player_client': ['web', 'mweb'],
-            }
-        }
-    else:
-        opts['extractor_args'] = {
-            'youtube': {
-                'player_client': ['android'],
-            }
-        }
 
     return opts
-
 
 def format_duration(seconds: Optional[int]) -> str:
     if not seconds:
@@ -233,7 +227,11 @@ def _run_download_task(task_id: str, url: str, format_id: str, ext: str):
                 'keepvideo': False,
             })
         else:
-            chosen_format = "bestvideo+bestaudio/best" if not format_id or format_id == "best" else f"{format_id}/bestvideo+bestaudio/best"
+            if not format_id or format_id == "best":
+                chosen_format = "bestvideo*+bestaudio/best"
+            else:
+                chosen_format = f"{format_id}/bestvideo*+bestaudio/best"
+
             ydl_opts.update({
                 'format': chosen_format,
                 'merge_output_format': 'mp4',
