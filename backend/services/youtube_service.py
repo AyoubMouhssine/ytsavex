@@ -39,22 +39,29 @@ def clean_error_message(err_msg: str) -> str:
     clean = re.sub(r'\x1b\[[0-9;]*m', '', err_msg)
     clean = clean.replace("ERROR: [youtube] ", "").replace("ERROR: ", "")
     return clean.strip()
+
 def get_base_ydl_opts() -> dict:
     opts = {
         'quiet': True,
         'no_warnings': True,
         'socket_timeout': 30,
         'geo_bypass': True,
-        'extractor_args': {
-            'youtube': {
-                # 'tv_embedded' en premier : fournit les flux directs sans blocage SABR sur datacenter
-                'player_client': ['tv_embedded', 'android', 'mweb', 'web'],
-            }
-        },
     }
 
     if os.path.exists(COOKIES_FILE_PATH) and os.path.getsize(COOKIES_FILE_PATH) > 0:
         opts['cookiefile'] = COOKIES_FILE_PATH
+        opts['extractor_args'] = {
+            'youtube': {
+                # web_creator (YouTube Studio) + mweb contournent le blocage PO-Token avec cookies sur datacenter
+                'player_client': ['web_creator', 'mweb', 'web'],
+            }
+        }
+    else:
+        opts['extractor_args'] = {
+            'youtube': {
+                'player_client': ['android'],
+            }
+        }
 
     return opts
 
@@ -216,9 +223,10 @@ def _run_download_task(task_id: str, url: str, format_id: str, ext: str):
             'progress_hooks': [progress_hook],
         })
 
+# Sélecteur universel tout-terrain
         if ext == "mp3":
             ydl_opts.update({
-                'format': 'bestaudio/best',
+                'format': 'ba/b/best', # ba = best audio, b = best (s'adapte à n'importe quel flux retourné)
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'mp3',
@@ -227,10 +235,11 @@ def _run_download_task(task_id: str, url: str, format_id: str, ext: str):
                 'keepvideo': False,
             })
         else:
+            # Sélecteur vidéo avec repli intelligent
             if not format_id or format_id == "best":
-                chosen_format = "bestvideo*+bestaudio/best"
+                chosen_format = "bv*+ba/b/best"
             else:
-                chosen_format = f"{format_id}/bestvideo*+bestaudio/best"
+                chosen_format = f"{format_id}/bv*+ba/b/best"
 
             ydl_opts.update({
                 'format': chosen_format,
@@ -239,7 +248,8 @@ def _run_download_task(task_id: str, url: str, format_id: str, ext: str):
 
         try:
             update_task_progress(task_id, "starting", 5.0, "Connexion...", "")
-
+            # LOG DE CONTRÔLE SUR RENDER
+            print(f"[YTSaveX Engine] Démarrage extraction {url} avec cookies={os.path.exists(COOKIES_FILE_PATH)}")
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=True)
                 raw_title = info.get('title', 'media')
