@@ -46,13 +46,21 @@ def get_base_ydl_opts() -> dict:
         'no_warnings': True,
         'socket_timeout': 30,
         'geo_bypass': True,
+        'extractor_args': {
+            'youtube': {
+                # Avec le proxy, les clients android et web fonctionnent normalement à 100%
+                'player_client': ['android', 'web'],
+            }
+        },
     }
 
-    # Si un proxy est défini dans les variables d'environnement de Render
+    # 1. INJECTION DU PROXY (contourne le blocage Render/AWS)
     proxy_url = os.getenv("YOUTUBE_PROXY")
     if proxy_url:
-        opts['proxy'] = proxy_url
+        opts['proxy'] = proxy_url.strip()
+        print(f"[YTSaveX] Proxy activé avec succès.")
 
+    # 2. INJECTION DES COOKIES
     if os.path.exists(COOKIES_FILE_PATH) and os.path.getsize(COOKIES_FILE_PATH) > 0:
         opts['cookiefile'] = COOKIES_FILE_PATH
 
@@ -219,7 +227,7 @@ def _run_download_task(task_id: str, url: str, format_id: str, ext: str):
 # Sélecteur universel tout-terrain
         if ext == "mp3":
             ydl_opts.update({
-                'format': 'ba/b/best', # ba = best audio, b = best (s'adapte à n'importe quel flux retourné)
+                'format': 'bestaudio/best',
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'mp3',
@@ -228,12 +236,7 @@ def _run_download_task(task_id: str, url: str, format_id: str, ext: str):
                 'keepvideo': False,
             })
         else:
-            # Sélecteur vidéo avec repli intelligent
-            if not format_id or format_id == "best":
-                chosen_format = "bv*+ba/b/best"
-            else:
-                chosen_format = f"{format_id}/bv*+ba/b/best"
-
+            chosen_format = "bestvideo*+bestaudio/best" if not format_id or format_id == "best" else f"{format_id}/bestvideo*+bestaudio/best"
             ydl_opts.update({
                 'format': chosen_format,
                 'merge_output_format': 'mp4',
