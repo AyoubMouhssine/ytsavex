@@ -14,9 +14,10 @@ router = APIRouter(prefix="/api", tags=["Admin & Config"])
 # Mot de passe admin par défaut (modifiable via la variable d'environnement ADMIN_KEY)
 ADMIN_KEY = os.getenv("ADMIN_KEY", "admin123456")
 
-# Chemin vers cookies.txt
-COOKIES_FILE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "cookies.txt")
-
+# Même chemin absolu garanti que youtube_service.py
+COOKIES_FILE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "cookies.txt"))
+if not os.path.exists(os.path.dirname(COOKIES_FILE_PATH)):
+    COOKIES_FILE_PATH = os.path.abspath("cookies.txt")
 
 def verify_admin(x_admin_key: Optional[str] = Header(None)):
     """Middleware d'authentification simple par clé secrète."""

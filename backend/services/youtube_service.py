@@ -28,11 +28,10 @@ PROGRESS_THROTTLE_SECONDS = 0.6 # Intervalle minimal d'écriture en base
 
 download_semaphore = threading.Semaphore(MAX_CONCURRENT_DOWNLOADS)
 
-# Chemin vers le fichier de cookies (dans le dossier backend/)
-COOKIES_FILE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "cookies.txt")
-if not os.path.exists(COOKIES_FILE_PATH):
-    # Si placé directement dans backend/
-    COOKIES_FILE_PATH = os.path.join(os.path.dirname(__file__), "cookies.txt")
+# Chemin absolu unique et garanti
+COOKIES_FILE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "cookies.txt"))
+if not os.path.exists(os.path.dirname(COOKIES_FILE_PATH)):
+    COOKIES_FILE_PATH = os.path.abspath("cookies.txt")
 
 
 def clean_error_message(err_msg: str) -> str:
@@ -40,7 +39,6 @@ def clean_error_message(err_msg: str) -> str:
     clean = re.sub(r'\x1b\[[0-9;]*m', '', err_msg)
     clean = clean.replace("ERROR: [youtube] ", "").replace("ERROR: ", "")
     return clean.strip()
-
 def get_base_ydl_opts() -> dict:
     opts = {
         'quiet': True,
@@ -48,16 +46,15 @@ def get_base_ydl_opts() -> dict:
         'socket_timeout': 30,
     }
 
-    # Si cookies.txt existe, on utilise le client web (qui correspond aux cookies du navigateur)
+    # Si cookies.txt existe (et n'est pas vide), on injecte le fichier de cookies
     if os.path.exists(COOKIES_FILE_PATH) and os.path.getsize(COOKIES_FILE_PATH) > 0:
         opts['cookiefile'] = COOKIES_FILE_PATH
         opts['extractor_args'] = {
             'youtube': {
-                'player_client': ['web'],
+                'player_client': ['web', 'mweb'],
             }
         }
     else:
-        # Sans cookies, le client android est le plus permissif
         opts['extractor_args'] = {
             'youtube': {
                 'player_client': ['android'],
@@ -65,6 +62,7 @@ def get_base_ydl_opts() -> dict:
         }
 
     return opts
+
 
 def format_duration(seconds: Optional[int]) -> str:
     if not seconds:
