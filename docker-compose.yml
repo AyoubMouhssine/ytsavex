@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ytsavex-api
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - ALLOWED_ORIGINS=https://ytsavex.com,https://www.ytsavex.com,http://localhost:3000
+      - ADMIN_KEY=admin123456
+    volumes:
+      # Persistance de la base de données et des cookies en dehors du conteneur
+      - ./backend/ytsavex.db:/app/ytsavex.db
+      - ./backend/cookies.txt:/app/cookies.txt

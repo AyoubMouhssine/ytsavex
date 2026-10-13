@@ -1,0 +1,13 @@
+# YTSaveX - High-Performance Online YouTube Downloader
+> YTSaveX is a free, web-based utility for downloading YouTube videos, audio tracks, and playlists.
+
+## Supported Formats
+- Video: MP4 (1080p Full HD, 720p HD, 480p, 360p)
+- Audio: High-fidelity MP3 (320 kbps)
+- Features: Full playlist extraction, instant stream conversion, zero invasive ads.
+
+## Available Languages
+- English: https://ytsavex.com/en
+- French: https://ytsavex.com/fr
+- Spanish: https://ytsavex.com/es
+- Arabic: https://ytsavex.com/ar

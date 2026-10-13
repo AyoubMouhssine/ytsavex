@@ -1,0 +1,86 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/venv/
+venv/
+.venv/
+
+# SQLite Database files
+*.db
+*.db-shm
+*.db-wal
+backend/*.db
+backend/*.db-*
+
+# YouTube Session Cookies
+*cookies.txt*
+*.bac
+*.bak
+
+# Next.js / frontend build outputs
+.next/
+frontend/.next/
+out/
+frontend/out/
+build/
+frontend/build/
+dist/
+coverage/
+
+codebase.md
+
+# YouTube Session Cookies
+backend/cookies.txt
+cookies.txt
+
+# Python caches and test/tool caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+
+# Local editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Package manager / framework caches
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+.turbo/
+.cache/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# Temporary files
+tmp/
+temp/
+*.tmp

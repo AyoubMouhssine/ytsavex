@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+/* 1. Configuration du mode sombre par classe pour Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* 2. Règle globale pour forcer le curseur pointeur partout */
+button,
+select,
+summary,
+a,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
+/* 3. Transition fluide lors du basculement de thème */
+@layer base {
+  html,
+  body {
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+}
